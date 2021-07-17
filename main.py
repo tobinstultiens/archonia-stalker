@@ -6,15 +6,13 @@ class BlogSpider(scrapy.Spider):
     start_urls = [
         "https://www.archonia.com/en-us/p/customer-wishlist/view?customerwishlist_id=34957"
     ]
-    # request_with_cookies = scrapy.Request(url="https://www.archonia.com/en-us/p/customer-wishlist/view?customerwishlist_id=34957",
-    # cookies=[{'archonia_com_shop': 'kt0ok2ho2pbrun20j4bua3oln3'}])
 
     def request(self, url, callback):
         """
         wrapper for scrapy.request
         """
         request = scrapy.Request(url=url, callback=callback)
-        request.cookies["archonia_com_shop"] = "kt0ok2ho2pbrun20j4bua3oln3"
+        request.cookies["archonia_com_shop"] = ""
         return request
 
     def start_requests(self):
