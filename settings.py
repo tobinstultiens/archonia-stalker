@@ -1,0 +1,5 @@
+WISHLIST = ''
+EMAIL = ''
+PASSWORD = ''
+
+ROBOTSTXT_OBEY = True
