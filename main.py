@@ -1,10 +1,9 @@
 import scrapy
 import yaml
 from scrapy.http.request.form import FormRequest
-from scrapy.mail import MailSender
+from discord_webhook import DiscordWebhook, DiscordEmbed
 
 config = yaml.safe_load(open("settings.yaml"))
-mailer = MailSender()
 
 
 class BlogSpider(scrapy.Spider):
@@ -29,9 +28,16 @@ class BlogSpider(scrapy.Spider):
     def parse2(self, response):
         for row in response.xpath('//*[@id="main-content"]/div/div[2]/div[2]/div'):
             title = row.css("a::text").get()
+            link = row.css("a::attr(href)").get()
             stock = row.css("span::text").get()
             if stock != "Out of stock":
-                mailer.send(to=[config["EMAIL"]], subject=f"{title} is now in stock", body=config["WISHLIST"])
+                webhook = DiscordWebhook(url=config["WEBHOOK_URL"], content=stock)
+                # create embed object for webhook
+                # you can set the color as a decimal (color=242424) or hex (color='03b2f8') number
+                embed = DiscordEmbed(title=f'{title}', description=f'{title} is in stock https://www.archonia.com{link}', color='03b2f8')
+                # add embed object to webhook
+                webhook.add_embed(embed)
+                response = webhook.execute()
 
             yield {
                 "title": title,
