@@ -214,3 +214,5 @@ tags
 data.txt
 
 # End of https://www.toptal.com/developers/gitignore/api/python,emacs,vim
+.vscode
+archonia/
