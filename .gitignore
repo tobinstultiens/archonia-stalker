@@ -211,5 +211,6 @@ Sessionx.vim
 tags
 # Persistent undo
 [._]*.un~
+data.txt
 
 # End of https://www.toptal.com/developers/gitignore/api/python,emacs,vim

@@ -1,5 +1,7 @@
 import scrapy
 import yaml
+import json
+import os.path
 from scrapy.http.request.form import FormRequest
 from discord_webhook import DiscordWebhook, DiscordEmbed
 
@@ -30,15 +32,24 @@ class BlogSpider(scrapy.Spider):
             title = row.css("a::text").get()
             link = row.css("a::attr(href)").get()
             stock = row.css("span::text").get()
-            if stock != "Out of stock":
-                webhook = DiscordWebhook(url=config["WEBHOOK_URL"], content=stock)
+            if os.path.isfile('data.txt'):
+                with open('data.txt') as json_file:
+                    data = json.load(json_file)
+            else:
+                data = json.loads("""{}""")
+
+            if stock != "Out of stock" and title not in data:
+                webhook = DiscordWebhook(url=config["WEBHOOK_URL"], content=stock + " " + title[:25] + "...")
                 # create embed object for webhook
                 # you can set the color as a decimal (color=242424) or hex (color='03b2f8') number
                 embed = DiscordEmbed(title=f'{title}', description=f'{title} is in stock https://www.archonia.com{link}', color='03b2f8')
                 # add embed object to webhook
                 webhook.add_embed(embed)
                 response = webhook.execute()
+                data[title] = ''
 
+                with open('data.txt', 'w') as outfile:
+                    json.dump(data, outfile)
             yield {
                 "title": title,
                 "stock": stock
