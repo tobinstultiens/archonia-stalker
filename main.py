@@ -39,7 +39,7 @@ class BlogSpider(scrapy.Spider):
                 data = json.loads("""{}""")
 
             if stock != "Out of stock" and title not in data:
-                webhook = DiscordWebhook(url=config["WEBHOOK_URL"], content=stock + " " + title[:25] + "...")
+                webhook = DiscordWebhook(url=config["WEBHOOK_URL"], content=stock + " " + title[:25] + "... <@&867379202839674890>")
                 # create embed object for webhook
                 # you can set the color as a decimal (color=242424) or hex (color='03b2f8') number
                 embed = DiscordEmbed(title=f'{title}', description=f'{title} is in stock https://www.archonia.com{link}', color='03b2f8')
