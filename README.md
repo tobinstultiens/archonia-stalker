@@ -20,6 +20,7 @@ WISHLIST: ''
 EMAIL: ''
 PASSWORD: ''
 WEBHOOK_URL: ''
+DISCORD_MENTION: ''
 ```
 
 ## Running
