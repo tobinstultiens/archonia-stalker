@@ -13,6 +13,7 @@ else:
 
 config = yaml.safe_load(open(settings))
 
+
 class WishListItem:
     def __init__(self, title, image, url, stock, last_checked):
         self.title = title
@@ -38,7 +39,8 @@ class ArchoniaWishListSpider(scrapy.Spider):
 
     def update_tracked_items(self):
         # TODO: remove empty titles
-        pass
+        with open("data.json", "w") as outfile:
+            json.dump(self.tracked_items, outfile)
 
     def parse(self, response):
         return [
@@ -59,14 +61,19 @@ class ArchoniaWishListSpider(scrapy.Spider):
         for row in response.xpath('//*[@id="main-content"]/div/div[2]/div[2]/div'):
             wishlist_item = self.parse_wishlist_item(row)
 
+            # Check if the item already exists
+            if wishlist_item.title in self.tracked_items:
+                # Check if the stock is the same as the stored one
+                if wishlist_item.stock != self.tracked_items[wishlist_item.title]:
+                    # Remove the wishlist item
+                    self.tracked_items.pop(wishlist_item.title)
+
             if (
                 wishlist_item.stock != "Out of stock"
                 and wishlist_item.title not in self.tracked_items
             ):
                 self.publish_discord_notification(wishlist_item)
-
-                # TODO: remove item from tracked items when known in stock?
-                self.tracked_items[wishlist_item.title] = ""
+                self.tracked_items[wishlist_item.title] = wishlist_item.stock
 
             yield wishlist_item.__dict__
 
@@ -81,17 +88,15 @@ class ArchoniaWishListSpider(scrapy.Spider):
 
     def publish_discord_notification(self, wishlist_item: WishListItem):
         webhook = DiscordWebhook(
-            url = config["WEBHOOK_URL"],
-            content = f'{wishlist_item.stock} {wishlist_item.title} {config["DISCORD_MENTION"]}',
+            url=config["WEBHOOK_URL"],
+            content=f'{wishlist_item.stock} {wishlist_item.title} {config["DISCORD_MENTION"]}',
         )
         embed = DiscordEmbed(
-            title=f'{wishlist_item.title}',
-            description=f'is in stock!',
-            color='03b2f8',
+            title=f"{wishlist_item.title}",
+            description="is in stock!",
+            color="03b2f8",
         )
         embed.set_image(url=wishlist_item.image)
-        embed.set_url(url=f'https://www.archonia.com{wishlist_item.url}')
+        embed.set_url(url=f"https://www.archonia.com{wishlist_item.url}")
         webhook.add_embed(embed)
         webhook.execute()
-
-
