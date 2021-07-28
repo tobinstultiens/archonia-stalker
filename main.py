@@ -15,11 +15,12 @@ config = yaml.safe_load(open(settings))
 
 
 class WishListItem:
-    def __init__(self, title, image, url, stock, last_checked):
+    def __init__(self, title, image, url, stock, button, last_checked):
         self.title = title
         self.image = image
         self.url = url
         self.stock = stock
+        self.button = button
         self.last_checked = last_checked
 
 
@@ -60,6 +61,7 @@ class ArchoniaWishListSpider(scrapy.Spider):
     def parse_wishlist(self, response):
         for row in response.xpath('//*[@id="main-content"]/div/div[2]/div[2]/div'):
             wishlist_item = self.parse_wishlist_item(row)
+            print(wishlist_item.button)
 
             # Check if the item already exists
             if wishlist_item.title in self.tracked_items:
@@ -71,6 +73,7 @@ class ArchoniaWishListSpider(scrapy.Spider):
             if (
                 wishlist_item.stock != "Out of stock"
                 and wishlist_item.title not in self.tracked_items
+                and wishlist_item.button != "\nNot for sale  "
             ):
                 self.publish_discord_notification(wishlist_item)
                 self.tracked_items[wishlist_item.title] = wishlist_item.stock
@@ -82,9 +85,10 @@ class ArchoniaWishListSpider(scrapy.Spider):
     def parse_wishlist_item(self, row):
         title = row.css("a::text").get()
         url = row.css("a::attr(href)").get()
+        button = row.css("button::text").get()
         image = row.css("img::attr(src)").get()
         stock = row.css("span::text").get()
-        return WishListItem(title, image, url, stock, datetime.now())
+        return WishListItem(title, image, url, stock, button, datetime.now())
 
     def publish_discord_notification(self, wishlist_item: WishListItem):
         webhook = DiscordWebhook(
