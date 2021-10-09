@@ -61,7 +61,6 @@ class ArchoniaWishListSpider(scrapy.Spider):
     def parse_wishlist(self, response):
         for row in response.xpath('//*[@id="main-content"]/div/div[2]/div[2]/div'):
             wishlist_item = self.parse_wishlist_item(row)
-            print(wishlist_item.button)
 
             # Check if the item already exists
             if wishlist_item.title in self.tracked_items:
