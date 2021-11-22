@@ -218,3 +218,4 @@ data.json
 .vscode
 archonia/
 settings.local.yaml
+volumes.json
